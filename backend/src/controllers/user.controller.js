@@ -147,7 +147,7 @@ const getuserInfo=asyncHandler(async (req,res)=>{
     if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
     const accessToken=await getAccessToken(user);
     try{
-        const response=await axios.get("https://www.people.googleapis.com/v1/people/me",
+        const response=await axios.get("https://people.googleapis.com/v1/people/me",
             {
                 params:{
                     personFields: "names,emailAddresses,photos,phoneNumbers,addresses,birthdays",
