@@ -96,6 +96,7 @@ const refresh_access_token=asyncHandler(async(req,res)=>{
         const decoded=jwt.verify(incomerefresh,process.env.REFRESH_TOKEN_SECRET);
         const user=await User.findById(decoded?._id);
         if(!user) throw new ApiError(401,"User not exists");
+        if(!user.refreshToken) throw new ApiError(404,"User Logged Out");
         if(user.refreshToken!==incomerefresh) throw new ApiError(401,"Invalid refresh token");
 
         const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user._id);
