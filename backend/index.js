@@ -2,7 +2,9 @@ import dotenv from "dotenv"
 import { app } from "./app.js"
 import connectDb from "./src/db/connectDb.js";
 
-dotenv.config();
+dotenv.config({
+    path: "./.env"
+});
 const port=process.env.PORT||3000;
 
 //405-refresh token of google gone make the frontend login again
