@@ -175,12 +175,17 @@ const logout=asyncHandler(async(req,res)=>{
     if(user.googleAccessToken){
         try {
             await axios.post(`https://oauth2.googleapis.com/revoke?token=${user.googleAccessToken}`,{},
-                {headers:{"Content-Type":"application/"}}
-            )
+                {headers:{"Content-Type":"application/x-www-form-urlencoded"}}
+            );
         } catch (error) {
-            
+            console.log("Google Token Revoke error",error.response?.data||error.message)
         }
     }
+
+    user.googleAccessToken=undefined;
+    user.googleRefreshToken=undefined;
+    user.refreshToken=undefined;
+    await user.save({validateBeforeSave: false})
 
     return res.status(200)
     .clearCookie("accessToken",options)
