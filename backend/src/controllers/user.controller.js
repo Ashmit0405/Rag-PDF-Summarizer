@@ -59,7 +59,7 @@ const signup_login=asyncHandler(async (req,res)=>{
         return res.status(400).json(new ApiError(400,"Failed to decode Google ID token"));
     }
     
-    let user=await User.findOne({googleId: decoded.sub});
+    let user=await User.findOne({googleId: decoded.sub}).select("-googleId -googleRefreshToken -googleAccessToken");
     console.log("Found User:", user);
     if(!user){
         user=await User.create({
@@ -169,15 +169,20 @@ const getuserInfo=asyncHandler(async (req,res)=>{
 
 const logout=asyncHandler(async(req,res)=>{
     const userid=req.user?._id;
-    await User.findByIdAndUpdate(userid,{
-        $unset:{
-            refreshToken: 1
-        }
-    },{
-        new: true,   
-    })
+    const user=await User.findById(userid)
+    if(!user) return res.status(400).json(new ApiError(400,"User Not Found"));
 
-    res.status(200)
+    if(user.googleAccessToken){
+        try {
+            await axios.post(`https://oauth2.googleapis.com/revoke?token=${user.googleAccessToken}`,{},
+                {headers:{"Content-Type":"application/"}}
+            )
+        } catch (error) {
+            
+        }
+    }
+
+    return res.status(200)
     .clearCookie("accessToken",options)
     .clearCookie("refreshToken",options)
     .json(new ApiResponse(200,"User logged out successfully"));
