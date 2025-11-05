@@ -1,22 +1,94 @@
-import { createContext,useState,useEffect, useCallback } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 
-export const AuthContext=createContext();
+export const AuthContext = createContext();
 
-export default function AuthProvider({children}){
-    const [user,setUser]=useState(null);
-    const [accessToken,setAccessToken]=useState(null);
-    const [refreshToken,setRefreshToken]=useState(null);
+export default function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const refresh_access=useCallback(async ()=>{
-        try {
-            const res=await fetch("http://localhost:8000/refresh-token",{
-                method: "POST",
-                credentials: "include"
-            })
+  const refreshAccess = useCallback(async () => {
+    try {
+      const res = await fetch("http://localhost:8000/refresh-token", {
+        method: "POST",
+        credentials: "include",
+      });
 
-            // if(!res.status)
-        } catch (error) {
-            
-        }
-    })
+      if (!res.ok) throw new Error("Session expired or unauthorized");
+
+      const data = await res.json();
+      const { accessToken, user } = data.data;
+      setAccessToken(accessToken);
+      setUser(user);
+      console.log(user)
+    } catch (error) {
+      console.warn("Session not active:", error.message);
+      setUser(null);
+      setAccessToken(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshAccess();
+  }, [refreshAccess]);
+
+  const loginWithGoogle = () => {
+    const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+    const params = new URLSearchParams({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      redirect_uri: "http://localhost:8000/oauth/callback",
+      response_type: "code",
+      scope: "openid email profile",
+      access_type: "offline",
+      prompt: "consent",
+    });
+
+    window.location.href = `${googleAuthUrl}?${params.toString()}`;
+  };
+
+  const getUserInfo = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/getuserInfo", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch user info");
+      const data = await res.json();
+      return data.data;
+    } catch (err) {
+      console.error("Error fetching Google user info:", err);
+      return null;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        loginWithGoogle,
+        logout,
+        getUserInfo,
+        refreshAccess,
+        loading,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
