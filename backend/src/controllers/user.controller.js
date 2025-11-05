@@ -24,7 +24,7 @@ const generateAccessTokenandRefreshToken=async(userid)=>{
 
 const signup_login=asyncHandler(async (req,res)=>{
     const {code}=req.query;
-    console.log("Google Code:", code);
+    // console.log("Google Code:", code);
     if(!code){
         return res.status(400).json(new ApiError(400,"Google Code is missing"));
     }
@@ -43,24 +43,24 @@ const signup_login=asyncHandler(async (req,res)=>{
         return res.status(500).json(new ApiError(500,"Failed to fetch Google tokens"));
     });
 
-    console.log(params.toString());
+    // console.log(params.toString());
 
-    console.log(token.data);
+    // console.log(token.data);
     const {access_token,refresh_token,expires_in,id_token}=token.data;
-    console.log("Google Tokens:", {access_token,refresh_token,expires_in,id_token});
+    // console.log("Google Tokens:", {access_token,refresh_token,expires_in,id_token});
     if(!access_token||!expires_in||!id_token){
         return res.status(400).json(new ApiError(400,"Failed to get Google tokens"));
     }
 
     const decoded=jwt.decode(id_token);
-    console.log(decoded);
+    // console.log(decoded);
     if(!decoded){
         console.log("Failed to decode Google ID token");
         return res.status(400).json(new ApiError(400,"Failed to decode Google ID token"));
     }
     
     let user=await User.findOne({googleId: decoded.sub}).select("-googleId -googleRefreshToken -googleAccessToken");
-    console.log("Found User:", user);
+    // console.log("Found User:", user);
     if(!user){
         user=await User.create({
             username: decoded.name,
@@ -81,12 +81,11 @@ const signup_login=asyncHandler(async (req,res)=>{
     }
     const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user?._id);
     res
-    .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(new ApiResponse(200,"User authenticated successfully",{
-        user: user,accessToken,refreshToken
-    }));
+    
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+    return res.redirect(`${FRONTEND_URL}`);
 })
 
 const refresh_access_token=asyncHandler(async(req,res)=>{
@@ -95,6 +94,7 @@ const refresh_access_token=asyncHandler(async(req,res)=>{
     try {
         const decoded=jwt.verify(incomerefresh,process.env.REFRESH_TOKEN_SECRET);
         const user=await User.findById(decoded?._id);
+        console.log(user)
         if(!user) throw new ApiError(401,"User not exists");
         if(!user.refreshToken) throw new ApiError(404,"User Logged Out");
         if(user.refreshToken!==incomerefresh) throw new ApiError(401,"Invalid refresh token");
@@ -103,7 +103,7 @@ const refresh_access_token=asyncHandler(async(req,res)=>{
         return res.status(200)
         .cookie("accessToken",accessToken,options)
         .cookie("refreshToken",refreshToken,options)
-        .json(new ApiResponse(200,"Access token refreshed successfully",{accessToken,refreshToken}));
+        .json(new ApiResponse(200,{accessToken,refreshToken,user},"Access token refreshed successfully"));
     } catch (error) {
         throw new ApiError(401,error?.message||"Invalid Refresh Token");
     }
