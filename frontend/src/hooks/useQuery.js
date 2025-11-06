@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getchats,sendquery } from "@/api/apiLayer.js";
 
 export function useQuery(chat_id) {
   const [qnas, setQnas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const prevchat=useRef(null)
 
   const fetchQnas = async () => {
     if (!chat_id) return;
@@ -28,11 +29,20 @@ export function useQuery(chat_id) {
         { question: query, answer: res.data.answer },
       ]);
     } catch (err) {
+      console.log(err)
       setError(err.response?.data?.message || "Error resolving query");
     } finally {
       setLoading(false);
+      await fetchQnas();
     }
   };
+
+  useEffect(()=>{
+    if(chat_id&&prevchat.current!==chat_id){
+      prevchat.current=chat_id
+      fetchQnas();
+    }
+  },[chat_id])
 
   return { qnas, loading, error, fetchQnas, askQuery };
 }

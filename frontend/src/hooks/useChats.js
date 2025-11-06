@@ -44,7 +44,7 @@ export function useChats() {
 
   useEffect(() => {
     fetchChats();
-  }, []);
+  }, [removeChat,createChat]);
 
   return { chats, loading, error, fetchChats, createChat, removeChat };
 }

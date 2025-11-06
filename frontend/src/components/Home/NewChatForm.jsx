@@ -25,7 +25,7 @@ export default function NewChatForm({ handleCreate }) {
 
     try {
       setLoading(true)
-      await handleCreate({title,desc,file})
+      await handleCreate(title,desc,file)
       setOpen(false)
       setTitle("")
       setDesc("")
