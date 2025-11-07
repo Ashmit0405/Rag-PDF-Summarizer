@@ -67,7 +67,7 @@ const get_summary=asyncHandler(async(req,res)=>{
         })
 
         if(!newchat) return res.status(401).json(new ApiError(401,"Error updating the database"));
-        return res.status(200).json(new ApiResponse(200,newchat,"Summary fetched successfully"));
+        return res.status(200).json(new ApiResponse(200,summary_response.data.summary,"Summary fetched successfully"));
     } catch (error) {
         console.log(error)
         throw new ApiError(500,"Error communicating to the ai server",error);

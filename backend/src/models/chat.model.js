@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const chatschema=new Schema({
     user:{
@@ -24,7 +24,8 @@ const chatschema=new Schema({
         required: true
     },
     summary:{
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
     }
 },{
     timestamps: true
