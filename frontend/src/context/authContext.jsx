@@ -5,6 +5,7 @@ export const AuthContext = createContext();
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
+  const [refreshToken, setRefreshToken]=useState(null);
   const [loading, setLoading] = useState(true);
 
   const refreshAccess = useCallback(async () => {
@@ -17,8 +18,9 @@ export default function AuthProvider({ children }) {
       if (!res.ok) throw new Error("Session expired or unauthorized");
 
       const data = await res.json();
-      const { accessToken, user } = data.data;
+      const { accessToken, user, refreshToken } = data.data;
       setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
       setUser(user);
       console.log(user)
     } catch (error) {
@@ -50,7 +52,7 @@ export default function AuthProvider({ children }) {
 
   const getUserInfo = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/getuserInfo", {
+      const res = await fetch("http://localhost:8000/profile", {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch user info");
@@ -62,25 +64,32 @@ export default function AuthProvider({ children }) {
     }
   };
 
-  const logout = async () => {
-    try {
-      await fetch("http://localhost:8000/api/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      setUser(null);
-      setAccessToken(null);
-    }
-  };
+const logout = async () => {
+  try {
+    const res = await fetch("http://localhost:8000/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    console.log(res)
+    if (!res.ok) throw new Error("Logout failed");
+
+    setUser(null);
+    setAccessToken(null);
+    setRefreshToken(null)
+    return true; 
+  } catch (err) {
+    console.error("Logout failed:", err);
+    return false;
+  }
+};
+
 
   return (
     <AuthContext.Provider
       value={{
         user,
         accessToken,
+        refreshToken,
         loginWithGoogle,
         logout,
         getUserInfo,

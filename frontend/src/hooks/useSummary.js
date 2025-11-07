@@ -10,7 +10,9 @@ export function useSummary() {
         try {
             setLoading(true);
             const res = await get_summary(chat_id, persona, job);
-            setSummary(res.data.summary);
+            console.log(res)
+            setSummary(res);
+            return res
         } catch (err) {
             setError(err.response?.data?.message || "Error fetching summary");
         } finally {

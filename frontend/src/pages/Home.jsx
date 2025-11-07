@@ -1,16 +1,16 @@
 import Layout from "@/components/Home/Layout";
 import ChatWindow from "@/components/Home/ChatWindow";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import { useChats } from "@/hooks/useChats";
-import { AuthContext } from "@/context/authContext";
+import { useSummary } from "@/hooks/useSummary";
 
 export default function Home() {
   const [selectedChat, setSelectedChat] = useState(null);
   const { chats } = useChats();
-  const { user } = useContext(AuthContext);
 
   const { qnas, askQuery, loading, error } = useQuery(selectedChat?._id);
+  const {fetchSummary}=useSummary();
 
   return (
     <Layout
@@ -19,7 +19,6 @@ export default function Home() {
         const chat = chats.find((c) => c._id === id);
         setSelectedChat(chat);
       }}
-      user={user}
     >
       <ChatWindow
         chat={selectedChat}
@@ -27,6 +26,7 @@ export default function Home() {
         onAsk={askQuery}
         loading={loading}
         error={error}
+        onGenerateSummary={fetchSummary}
       />
     </Layout>
   );

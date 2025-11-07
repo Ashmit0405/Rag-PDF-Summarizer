@@ -1,11 +1,34 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import QnaItem from "./QnaItem.jsx";
+import ChatHeader from "./ChatHeader";
+import SummarySection from "./SummarySection";
+import QnaList from "./QnaList";
+import MessageInput from "./MessageInput";
 
-export default function ChatWindow({ chat, qnas, onAsk, loading, error }) {
+export default function ChatWindow({
+  chat,
+  qnas,
+  onAsk,
+  loading,
+  error,
+  onGenerateSummary,
+}) {
   const [query, setQuery] = useState("");
+  const [showSummary, setShowSummary] = useState(false);
+  const [summary, setSummary] = useState("No Summary Available");
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [persona, setPersona] = useState("");
+  const [job, setJob] = useState("");
+
+    useEffect(() => {
+    if (chat?.summary) {
+      setSummary(chat.summary);
+      setShowSummary(true);
+    } else {
+      setSummary("No Summary Available");
+      setShowSummary(false);
+    }
+  }, [chat]);
 
   if (!chat)
     return (
@@ -20,32 +43,39 @@ export default function ChatWindow({ chat, qnas, onAsk, loading, error }) {
     setQuery("");
   };
 
-  return (
-    <Card className="flex flex-col flex-1 h-full p-4">
-      <h1 className="font-extrabold ">{chat.title}</h1>
-      {chat.description.length>0?<p className="font-semibold">Description: {chat.description}</p>:<p className="font-semibold">No Description</p>}
-      <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-        {loading ? (
-          <div className="text-gray-500 text-center">Loading...</div>
-        ) : error ? (
-          <div className="text-red-500 text-center">{error}</div>
-        ) : qnas && qnas.length > 0 ? (
-          qnas.map((qna, i) => <QnaItem key={i} qna={qna} />)
-        ) : (
-          <div className="text-gray-500 text-center">No Q&As yet.</div>
-        )}
-      </div>
+  const handleGenerateSummary = async () => {
+    if (!onGenerateSummary) return;
+    try {
+      setSummaryLoading(true);
+      const result = await onGenerateSummary(chat._id, persona, job);
+      setSummary(result || "No summary generated.");
+      setShowSummary(true);
+    } catch {
+      setSummary("Error generating summary.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="Ask something..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <Button onClick={handleSend} disabled={!query.trim()}>
-          Send
-        </Button>
-      </div>
+  return (
+    <Card className="flex flex-col flex-1 h-full p-4 space-y-3">
+      <ChatHeader title={chat.title} description={chat.description} />
+
+      <SummarySection
+        persona={persona}
+        job={job}
+        setPersona={setPersona}
+        setJob={setJob}
+        handleGenerateSummary={handleGenerateSummary}
+        showSummary={showSummary}
+        setShowSummary={setShowSummary}
+        summary={summary}
+        summaryLoading={summaryLoading}
+      />
+
+      <QnaList qnas={qnas} loading={loading} error={error} />
+
+      <MessageInput query={query} setQuery={setQuery} handleSend={handleSend} />
     </Card>
   );
 }
