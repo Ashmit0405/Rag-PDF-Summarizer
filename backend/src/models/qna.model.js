@@ -12,7 +12,7 @@ const qnaschema=new Schema({
         required: true
     },
     content:{
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         required: true
     }
 },{

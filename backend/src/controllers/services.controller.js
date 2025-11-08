@@ -107,7 +107,7 @@ const resolve_query=asyncHandler(async(req,res)=>{
         const qna_answer=await QNA.create({
             chat: chat_id,
             role: "agent",
-            content: result.data.answer
+            content: result.data
         })
         if(!qna_answer) return res.status(500).json(new ApiError(500,"Error saving the chats"));
         return res.status(200).json(new ApiResponse(200,result.data,"The Rationals fetched successfully"));
