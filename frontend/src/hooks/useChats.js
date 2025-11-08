@@ -52,7 +52,7 @@ export function useChats() {
 
   useEffect(() => {
     fetchChats();
-    const interval=setInterval(fetchChats,1000);
+    const interval=setInterval(fetchChats,2000);
     return ()=>clearInterval(interval)
   }, [fetchChats]);
 

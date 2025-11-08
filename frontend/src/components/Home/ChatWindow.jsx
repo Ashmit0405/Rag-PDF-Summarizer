@@ -59,7 +59,7 @@ export default function ChatWindow({
 
   return (
     <Card className="flex flex-col flex-1 h-full p-4 space-y-3">
-      <ChatHeader title={chat.title} description={chat.description} />
+      <ChatHeader title={chat.title} description={chat.description} pdf_url={chat.pdf}/>
 
       <SummarySection
         persona={persona}

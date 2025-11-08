@@ -24,12 +24,14 @@ export function useQuery(chat_id) {
     try {
       setLoading(true);
       const res = await sendquery(chat_id, query);
+      console.log(res)
       setQnas((prev) => [
         ...prev,
         { question: query, answer: res.data.answer },
       ]);
     } catch (err) {
       console.log(err)
+      await fetchQnas()
       setError(err.response?.data?.message || "Error resolving query");
     } finally {
       setLoading(false);

@@ -11,7 +11,6 @@ import { AuthContext } from "@/context/authContext.jsx";
 
 export default function ProfileCard() {
   const { logout, user } = useContext(AuthContext);
-  console.log(user)
   const navigate = useNavigate();
 
   const handleLogout = async () => {
