@@ -1,16 +1,20 @@
-import React, { useContext } from "react";
+import React, { useContext,useEffect } from "react";
 import { AuthContext } from "../context/authContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const { loginWithGoogle, user } = useContext(AuthContext);
+  const { loginWithGoogle, user, getUserInfo,setUser } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  React.useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const profile = await getUserInfo();
+      if (profile) {
+        setUser(profile);
+        navigate("/");
+      }
+    };
+    fetchUser();
+  }, [getUserInfo, navigate, setUser]);
 
   const handleGoogleSignup = async () => {
     try {

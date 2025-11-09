@@ -22,7 +22,6 @@ export default function AuthProvider({ children }) {
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
       setUser(user);
-      console.log(user)
     } catch (error) {
       console.warn("Session not active:", error.message);
       setUser(null);
@@ -95,6 +94,7 @@ const logout = async () => {
         getUserInfo,
         refreshAccess,
         loading,
+        setUser
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import { useChats } from "@/hooks/useChats";
 import { useSummary } from "@/hooks/useSummary";
+import ProfileCard from "@/components/Home/ProfileCard";
 
 export default function Home() {
   const [selectedChat, setSelectedChat] = useState(null);
@@ -13,6 +14,10 @@ export default function Home() {
   const {fetchSummary}=useSummary();
 
   return (
+    <>
+      <div className="absolute top-4 right-4">
+          <ProfileCard/>
+        </div>
     <Layout
       chats={chats}
       onSelectChat={(id) => {
@@ -29,5 +34,6 @@ export default function Home() {
         onGenerateSummary={fetchSummary}
       />
     </Layout>
+    </>
   );
 }

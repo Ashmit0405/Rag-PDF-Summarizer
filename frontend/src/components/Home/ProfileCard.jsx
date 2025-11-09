@@ -13,6 +13,10 @@ export default function ProfileCard() {
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const displayName = user?.names?.[0]?.displayName || "User";
+  const email = user?.emailAddresses?.[0]?.value || "No email";
+  const photoUrl = user?.photos?.[0]?.url || null;
+
   const handleLogout = async () => {
     const success = await logout();
     if (success) {
@@ -24,16 +28,22 @@ export default function ProfileCard() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="cursor-pointer">
-          <AvatarImage src={user?.image} alt={user?.username} />
-          <AvatarFallback>{user?.username?.[0] ?? "U"}</AvatarFallback>
+          <AvatarImage src={photoUrl} alt={displayName} />
+          <AvatarFallback>{displayName?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem disabled className="text-gray-500">
-          {user?.email}
+          {displayName}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+        <DropdownMenuItem disabled className="text-gray-500">
+          {email}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+        >
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
