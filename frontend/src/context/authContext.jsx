@@ -10,7 +10,9 @@ export default function AuthProvider({ children }) {
 
   const refreshAccess = useCallback(async () => {
     try {
-      const res = await axiosInstance.post("/refresh-token");
+      const res = await axiosInstance.post("/refresh-token",{},{
+        withCredentials: true
+      });
       const { accessToken, refreshToken, user } = res.data.data;
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
@@ -43,7 +45,9 @@ export default function AuthProvider({ children }) {
 
   const getUserInfo = async () => {
     try {
-      const res = await axiosInstance.get("/profile");
+      const res = await axiosInstance.get("/profile",{
+        withCredentials: true
+      });
       return res.data.data;
     } catch (err) {
       console.error("Error fetching Google user info:", err.response?.data || err.message);
@@ -53,7 +57,9 @@ export default function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      const res = await axiosInstance.post("/logout");
+      const res = await axiosInstance.post("/logout",{},{
+        withCredentials: true
+      });
       if (res.status !== 200) throw new Error("Logout failed");
 
       setUser(null);
