@@ -85,7 +85,7 @@ const signup_login=asyncHandler(async (req,res)=>{
     .cookie("refreshToken", refreshToken, options)
     
     const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-    return res.redirect(`${FRONTEND_URL}`);
+    return res.redirect(`${FRONTEND_URL}/home`);
 })
 
 const refresh_access_token=asyncHandler(async(req,res)=>{
