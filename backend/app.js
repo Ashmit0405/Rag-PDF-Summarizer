@@ -10,6 +10,14 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
     methods: ["GET","POST","DELETE","PUT","OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+      "Access-Control-Allow-Credentials"
+    ]
 }));
 
 app.use(cookieParser());
