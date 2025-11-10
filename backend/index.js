@@ -9,7 +9,7 @@ const port=process.env.PORT||3000;
 
 //405-refresh token of google gone make the frontend login again
 //409-token expired
-
+console.log(process.env.NODE_ENV)
 connectDb()
 .then(()=>{
     app.listen(port,()=>{
