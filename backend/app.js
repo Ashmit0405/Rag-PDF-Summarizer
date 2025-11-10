@@ -7,7 +7,11 @@ import { serv_router } from "./src/routes/service.route.js";
 
 const app=express();
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: [
+    "https://rag-pdf-summarizer.vercel.app",
+    "https://rag-pdf-summarizer-git-main-ashmits-projects-9bd994dd.vercel.app",
+    "https://rag-pdf-summarizer-loutrq2ow-ashmits-projects-9bd994dd.vercel.app"
+  ],
     credentials: true,
     methods: ["GET","POST","DELETE","PUT","OPTIONS"],
 }));
