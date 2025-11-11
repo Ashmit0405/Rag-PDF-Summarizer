@@ -60,7 +60,7 @@ const signup_login=asyncHandler(async (req,res)=>{
     }
     
     let user=await User.findOne({googleId: decoded.sub}).select("-googleId -googleRefreshToken -googleAccessToken");
-    // console.log("Found User:", user);
+    console.log("Found User:", user);
     if(!user){
         user=await User.create({
             username: decoded.name,
@@ -83,7 +83,8 @@ const signup_login=asyncHandler(async (req,res)=>{
     res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    
+    console.log(options);
+    console.log("Redirecting: ",process.env.FRONTEND_URL);
     const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
     return res.redirect(`${FRONTEND_URL}`);
 })
