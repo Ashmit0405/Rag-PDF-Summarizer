@@ -32,7 +32,7 @@ const signup_login=asyncHandler(async (req,res)=>{
     const params=new URLSearchParams({
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: "https://rag-pdf-summarizer-5e3a.onrender.com/oauth/callback",
+        redirect_uri: "http://localhost:8000/oauth/callback",
         code,
         grant_type: "authorization_code"
     })
@@ -80,13 +80,13 @@ const signup_login=asyncHandler(async (req,res)=>{
         await user.save({validateBeforeSave: false});
     }
     const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user?._id);
-    res
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
     console.log(options);
     console.log("Redirecting: ",process.env.FRONTEND_URL);
     const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-    return res.redirect(`${FRONTEND_URL}`);
+    return res.status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .redirect(`${FRONTEND_URL}/auth/success`)
 })
 
 const refresh_access_token=asyncHandler(async(req,res)=>{

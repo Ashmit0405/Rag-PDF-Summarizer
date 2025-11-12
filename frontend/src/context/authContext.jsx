@@ -34,12 +34,14 @@ export default function AuthProvider({ children }) {
     const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
     const params = new URLSearchParams({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      redirect_uri: `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/oauth/callback`,
+      redirect_uri: `${import.meta.env.VITE_BACKEND_URL}/oauth/callback`,
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",
       prompt: "consent",
     });
+    const finalUrl = `${googleAuthUrl}?${params.toString()}`;
+    console.log("Redirecting to:", finalUrl); // 👈 check this
     window.location.href = `${googleAuthUrl}?${params.toString()}`;
   };
 

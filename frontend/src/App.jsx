@@ -4,6 +4,7 @@ import './App.css'
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { AuthContext } from './context/authContext.jsx'
 import Home from './pages/Home.jsx'
+import AuthSuccess from './pages/AuthSuccess.jsx'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
@@ -25,6 +26,7 @@ function App() {
           }
         />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
       </Routes>
     </BrowserRouter>
   )
