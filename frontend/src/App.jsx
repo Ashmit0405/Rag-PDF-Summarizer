@@ -27,6 +27,7 @@ function App() {
         />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/index.html" element={<AuthSuccess/>} />
       </Routes>
     </BrowserRouter>
   )
