@@ -9,7 +9,8 @@ const app=express();
 console.log(process.env.CORS_ORIGIN);
 app.use(cors({
     origin: ["http://127.0.0.1:5173",
-      "http://localhost:5173",],
+      "http://localhost:5173",
+    "https://rag-pdf-summarizer.vercel.app"],
     credentials: true,
     methods: ["GET","POST","DELETE","PUT","OPTIONS"],
     allowedHeaders: [
