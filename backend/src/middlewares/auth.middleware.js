@@ -15,9 +15,9 @@ const jwtVerify=asyncHandler(async (req,res,next)=>{
         req.user=user;
         next();
     } catch (error) {
-        if(error.name==="TokenExpiredError"){
-            throw new ApiError(409,"Token Expired");
-        }
+        // if(error.name==="TokenExpiredError"){
+        //     throw new ApiError(409,"Token Expired");
+        // }
         throw new ApiError(401,error?.message||"Unauthorized Access");
     }
 })

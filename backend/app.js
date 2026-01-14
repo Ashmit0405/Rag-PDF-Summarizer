@@ -6,8 +6,10 @@ import { sysrouter } from "./src/routes/system.route.js";
 import { serv_router } from "./src/routes/service.route.js";
 
 const app=express();
+console.log(process.env.CORS_ORIGIN);
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: ["http://127.0.0.1:5173",
+      "http://localhost:5173",],
     credentials: true,
     methods: ["GET","POST","DELETE","PUT","OPTIONS"],
     allowedHeaders: [

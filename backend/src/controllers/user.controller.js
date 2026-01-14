@@ -22,83 +22,294 @@ const generateAccessTokenandRefreshToken=async(userid)=>{
     }
 }
 
-const signup_login=asyncHandler(async (req,res)=>{
-    const {code}=req.query;
-    // console.log("Google Code:", code);
-    if(!code){
-        return res.status(400).json(new ApiError(400,"Google Code is missing"));
+// const signup_login=asyncHandler(async (req,res)=>{
+//     const {code}=req.query;
+//     // console.log("Google Code:", code);
+//     if(!code){
+//         return res.status(400).json(new ApiError(400,"Google Code is missing"));
+//     }
+
+//     const params=new URLSearchParams({
+//         client_id: process.env.GOOGLE_CLIENT_ID,
+//         client_secret: process.env.GOOGLE_CLIENT_SECRET,
+//         redirect_uri: `https://rag-pdf-summarizer-5e3a.onrender.com/oauth/callback`,
+//         code,
+//         grant_type: "authorization_code"
+//     })
+
+//     const token=await axios.post("https://oauth2.googleapis.com/token",params,
+//     {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).catch((error)=>{
+//         console.error("Error fetching Google tokens:", error.response?.data || error.message);
+//         return res.status(500).json(new ApiError(500,"Failed to fetch Google tokens"));
+//     });
+
+//     // console.log(params.toString());
+
+//     // console.log(token.data);
+//     const {access_token,refresh_token,expires_in,id_token}=token.data;
+//     // console.log("Google Tokens:", {access_token,refresh_token,expires_in,id_token});
+//     if(!access_token||!expires_in||!id_token){
+//         return res.status(400).json(new ApiError(400,"Failed to get Google tokens"));
+//     }
+
+//     const decoded=jwt.decode(id_token);
+//     // console.log(decoded);
+//     if(!decoded){
+//         console.log("Failed to decode Google ID token");
+//         return res.status(400).json(new ApiError(400,"Failed to decode Google ID token"));
+//     }
+    
+//     let user=await User.findOne({googleId: decoded.sub}).select("-googleId -googleRefreshToken -googleAccessToken");
+//     console.log("Found User:", user);
+//     if(!user){
+//         user=await User.create({
+//             username: decoded.name,
+//             email: decoded.email,
+//             googleId: decoded.sub,
+//             ...(refresh_token&&{googleRefreshToken: refresh_token}),
+//             googleAccessToken: access_token,
+//             expiry_token: new Date(Date.now() + expires_in * 1000)
+//         });
+//         console.log("Created User:", user);
+//         if(!user) return res.status(500).json(new ApiError(500,"Error Creating the User"));
+//     }
+//     else{
+//         user.googleAccessToken=access_token;
+//         if(refresh_token) user.googleRefreshToken=refresh_token;
+//         user.expiry_token=new Date(Date.now() + expires_in * 1000);
+//         await user.save({validateBeforeSave: false});
+//     }
+//     const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user?._id);
+//     console.log(options);
+//     console.log("Redirecting: ",process.env.FRONTEND_URL);
+//     const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+//     return res.status(200)
+//     .cookie("accessToken", accessToken, options)
+//     .cookie("refreshToken", refreshToken, options)
+//     .redirect(`${FRONTEND_URL}/auth/success`)
+// })
+
+// const refresh_access_token=asyncHandler(async(req,res)=>{
+//     const incomerefresh=req.cookies.refreshToken;
+//     if(!incomerefresh) return new ApiError(401,"Unauthorized Token");
+//     try {
+//         const decoded=jwt.verify(incomerefresh,process.env.REFRESH_TOKEN_SECRET);
+//         const user=await User.findById(decoded?._id);
+//         if(!user) throw new ApiError(401,"User not exists");
+//         if(!user.refreshToken) throw new ApiError(404,"User Logged Out");
+//         if(user.refreshToken!==incomerefresh) throw new ApiError(401,"Invalid refresh token");
+
+//         const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user._id);
+//         return res.status(200)
+//         .cookie("accessToken",accessToken,options)
+//         .cookie("refreshToken",refreshToken,options)
+//         .json(new ApiResponse(200,{accessToken,refreshToken,user},"Access token refreshed successfully"));
+//     } catch (error) {
+//         throw new ApiError(401,error?.message||"Invalid Refresh Token");
+//     }
+// })
+
+// const getAccessToken=async(user)=>{
+//     const curr=new Date();
+//     try {
+//         if(!user.expiry_token||user.expiry_token<curr){
+//             const tokens=await refreshGoogleAccessToken(user);
+//             user.googleAccessToken=tokens.access_token;
+//             user.expiry_token=new Date(Date.now()+tokens.expires_in*1000);
+//             await user.save({validateBeforeSave: false});
+//         }
+//         return user.googleAccessToken;
+//     } catch (err) {
+//         if(err?.response?.data?.error==="invalid_grant"){
+//             throw new ApiError(405,"Refresh Token Expired. Please Login Again.")
+//         }
+//         throw new ApiError(500,"Failed to get Access Token");
+//     }
+// }
+
+// const refreshGoogleAccessToken=async(user)=>{
+//     const params=new URLSearchParams({
+//         client_id: process.env.GOOGLE_CLIENT_ID,
+//         client_secret: process.env.GOOGLE_CLIENT_SECRET,
+//         refresh_token: user.googleRefreshToken,
+//         grant_type: "refresh_token"
+//     });
+
+//     const token=await axios.post("https://oauth2.googleapis.com/token",
+//         params,
+//         {headers:{"Content-Type": "application/x-www-form-urlencoded"}});
+
+//     return token.data;
+// }
+
+// const getuserInfo=asyncHandler(async (req,res)=>{
+//     const userid=req.user?._id;
+//     const user=await User.findById(userid);
+//     if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
+//     const accessToken=await getAccessToken(user);
+//     try{
+//         const response=await axios.get("https://people.googleapis.com/v1/people/me",
+//             {
+//                 params:{
+//                     personFields: "names,emailAddresses,photos,phoneNumbers,addresses,birthdays",
+//                 },
+//                 headers:{
+//                     Authorization: `Bearer ${accessToken}`
+//                 }
+//             }
+
+//         );
+//         return res.status(200).json(new ApiResponse(200,response.data,"User Info Fetched Successfully"));
+//     }
+//     catch(error){
+//         console.log(error);
+//         return res.status(401).json(new ApiError(401,"Error fetching the user"));
+//     }
+// })
+
+// const logout=asyncHandler(async(req,res)=>{
+//     const userid=req.user?._id;
+//     const user=await User.findById(userid)
+//     if(!user) return res.status(400).json(new ApiError(400,"User Not Found"));
+
+//     if(user.googleAccessToken){
+//         try {
+//             await axios.post(`https://oauth2.googleapis.com/revoke?token=${user.googleAccessToken}`,{},
+//                 {headers:{"Content-Type":"application/x-www-form-urlencoded"}}
+//             );
+//         } catch (error) {
+//             console.log("Google Token Revoke error",error.response?.data||error.message)
+//         }
+//     }
+
+//     user.googleAccessToken=undefined;
+//     user.googleRefreshToken=undefined;
+//     user.refreshToken=undefined;
+//     await user.save({validateBeforeSave: false})
+
+//     return res.status(200)
+//     .clearCookie("accessToken",options)
+//     .clearCookie("refreshToken",options)
+//     .json(new ApiResponse(200,"User logged out successfully"));
+// })
+
+const registerUser=asyncHandler(async(req,res)=>{
+    const {username,email,password,fullname}=req.body;
+    if(!username||!email||!password){
+        return res.status(400).json(new ApiError(400,"Some fields are missing"));
     }
+    const resp=await User.findOne({$or:[{username},{email}]});
+    if(resp) return res.status(400).json(new ApiError(400,"User already exists"));
 
-    const params=new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `https://rag-pdf-summarizer-5e3a.onrender.com/oauth/callback`,
-        code,
-        grant_type: "authorization_code"
-    })
-
-    const token=await axios.post("https://oauth2.googleapis.com/token",params,
-    {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).catch((error)=>{
-        console.error("Error fetching Google tokens:", error.response?.data || error.message);
-        return res.status(500).json(new ApiError(500,"Failed to fetch Google tokens"));
+    const user=await User.create({
+        username,
+        email,
+        password,
+        fullname:fullname||username
     });
 
-    // console.log(params.toString());
+    const created=await User.findById(user._id).select("-password -refreshToken");
+    if(!created) return res.status(500).json(new ApiError(500,"Error creating the user"));
+    return res.status(201).json(new ApiResponse(201,created,"User registered successfully"));
+})
 
-    // console.log(token.data);
-    const {access_token,refresh_token,expires_in,id_token}=token.data;
-    // console.log("Google Tokens:", {access_token,refresh_token,expires_in,id_token});
-    if(!access_token||!expires_in||!id_token){
-        return res.status(400).json(new ApiError(400,"Failed to get Google tokens"));
-    }
+const login=asyncHandler(async(req,res)=>{
+    const {email,password,username}=req.body;
+    if(!email||!password||!username) return res.status(400).json(new ApiError(400,"Fields remain missing"));
+    console.log("Login attempt:", {email, username});
+    const user=await User.findOne({$or:[{email},{username}]});
+    if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
 
-    const decoded=jwt.decode(id_token);
-    // console.log(decoded);
-    if(!decoded){
-        console.log("Failed to decode Google ID token");
-        return res.status(400).json(new ApiError(400,"Failed to decode Google ID token"));
-    }
+    const ispasscorrect=await user.ispasswordcorrect(password);
+    if(!ispasscorrect) return res.status(400).json(new ApiError(400,"Incorrect password"));
+
+    const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user._id);
+    const loggedin=await User.findById(user._id).select("-password -refreshToken");
     
-    let user=await User.findOne({googleId: decoded.sub}).select("-googleId -googleRefreshToken -googleAccessToken");
-    console.log("Found User:", user);
-    if(!user){
-        user=await User.create({
-            username: decoded.name,
-            email: decoded.email,
-            googleId: decoded.sub,
-            ...(refresh_token&&{googleRefreshToken: refresh_token}),
-            googleAccessToken: access_token,
-            expiry_token: new Date(Date.now() + expires_in * 1000)
-        });
-        console.log("Created User:", user);
-        if(!user) return res.status(500).json(new ApiError(500,"Error Creating the User"));
-    }
-    else{
-        user.googleAccessToken=access_token;
-        if(refresh_token) user.googleRefreshToken=refresh_token;
-        user.expiry_token=new Date(Date.now() + expires_in * 1000);
-        await user.save({validateBeforeSave: false});
-    }
-    const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user?._id);
-    console.log(options);
-    console.log("Redirecting: ",process.env.FRONTEND_URL);
-    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+    // const options={
+    //     httpOnly:true,
+    //     secure: process.env.NODE_ENV==="production",
+    //     sameSite: "lax",
+    //     path: "/"  
+    // }
+    console.log("Login successful, setting cookies with options:", options);
     return res.status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .redirect(`${FRONTEND_URL}/auth/success`)
+        .cookie("accessToken",accessToken,options)
+        .cookie("refreshToken",refreshToken,options)
+        .json(new ApiResponse(200,{accessToken,refreshToken,loggedin},"User logged in successfully"));
+})
+
+const logout=asyncHandler(async(req,res)=>{
+    const userid=req.user?._id;
+    await User.findByIdAndUpdate(userid,{
+        $unset:{refreshToken:1}
+    },{
+        new: true
+    })
+    // const options={
+    //     httpOnly:true,
+    //     secure: process.env.NODE_ENV==="production",
+    //     sameSite: "lax",
+    //     path: "/"  
+    // }
+    console.log(options)
+    return res.status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new ApiResponse(200,"User logged out successfully"));
+})
+
+const getcurruser=asyncHandler(async(req,res)=>{
+    if(!req.user) return res.status(404).json(new ApiError(404,"User Not Found"));
+    const {password,refreshToken,...user}=req.user;
+    return res.status(200).json(new ApiResponse(200,user,"Current user fetched successfully"));
+})
+
+const changepass=asyncHandler(async(req,res)=>{
+    const userid=req.user?._id;
+    const {oldpassword,newpassword}=req.body;
+    if(!oldpassword||!newpassword) return res.status(400).json(new ApiError(400,"Fields remain missing"));
+    const user=await User.findById(userid);
+    if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
+    if(oldpassword===newpassword) return res.status(400).json(new ApiError(400,"New password must be different from old password"));  
+    const ispasscorr=await user.ispasswordcorrect(oldpassword);
+    if(!ispasscorr) return res.status(400).json(new ApiError(400,"Incorrect old password"));
+    user.password=newpassword;
+    await user.save({validateBeforeSave:true});
+    return res.status(200).json(new ApiResponse(200,"Password changed successfully"));
+})  
+
+const changedetails=asyncHandler(async(req,res)=>{
+    const {fullname,email,username}=req.body;
+    if(!fullname&&!email&&!username){
+        return res.status(400).json(new ApiError(400,"No details to update"));
+    }
+    const user=await User.findByIdAndUpdate(req.user?._id,{
+        $set:{
+            fullname: fullname||req.user.fullname,
+            email: email||req.user.email,
+            username: username||req.user.username
+        }
+    },{new: true}).select("-password -refreshToken");
+    if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
+    return res.status(200).json(new ApiResponse(200,user,"User details updated successfully"));
 })
 
 const refresh_access_token=asyncHandler(async(req,res)=>{
-    const incomerefresh=req.cookies.refreshToken;
+    const incomerefresh=req.cookies.refreshToken||req.body.refreshToken;
     if(!incomerefresh) return new ApiError(401,"Unauthorized Token");
     try {
         const decoded=jwt.verify(incomerefresh,process.env.REFRESH_TOKEN_SECRET);
         const user=await User.findById(decoded?._id);
         if(!user) throw new ApiError(401,"User not exists");
         if(!user.refreshToken) throw new ApiError(404,"User Logged Out");
-        if(user.refreshToken!==incomerefresh) throw new ApiError(401,"Invalid refresh token");
-
+        if(user?.refreshToken!==incomerefresh) throw new ApiError(401,"Invalid refresh token");
+        // const options={
+        //     httpOnly:true,
+        //     secure: process.env.NODE_ENV==="production",
+        //     sameSite: "lax",
+        //     path: "/"
+        // }
         const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(user._id);
         return res.status(200)
         .cookie("accessToken",accessToken,options)
@@ -109,88 +320,5 @@ const refresh_access_token=asyncHandler(async(req,res)=>{
     }
 })
 
-const getAccessToken=async(user)=>{
-    const curr=new Date();
-    try {
-        if(!user.expiry_token||user.expiry_token<curr){
-            const tokens=await refreshGoogleAccessToken(user);
-            user.googleAccessToken=tokens.access_token;
-            user.expiry_token=new Date(Date.now()+tokens.expires_in*1000);
-            await user.save({validateBeforeSave: false});
-        }
-        return user.googleAccessToken;
-    } catch (err) {
-        if(err?.response?.data?.error==="invalid_grant"){
-            throw new ApiError(405,"Refresh Token Expired. Please Login Again.")
-        }
-        throw new ApiError(500,"Failed to get Access Token");
-    }
-}
-
-const refreshGoogleAccessToken=async(user)=>{
-    const params=new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token: user.googleRefreshToken,
-        grant_type: "refresh_token"
-    });
-
-    const token=await axios.post("https://oauth2.googleapis.com/token",
-        params,
-        {headers:{"Content-Type": "application/x-www-form-urlencoded"}});
-
-    return token.data;
-}
-
-const getuserInfo=asyncHandler(async (req,res)=>{
-    const userid=req.user?._id;
-    const user=await User.findById(userid);
-    if(!user) return res.status(404).json(new ApiError(404,"User Not Found"));
-    const accessToken=await getAccessToken(user);
-    try{
-        const response=await axios.get("https://people.googleapis.com/v1/people/me",
-            {
-                params:{
-                    personFields: "names,emailAddresses,photos,phoneNumbers,addresses,birthdays",
-                },
-                headers:{
-                    Authorization: `Bearer ${accessToken}`
-                }
-            }
-
-        );
-        return res.status(200).json(new ApiResponse(200,response.data,"User Info Fetched Successfully"));
-    }
-    catch(error){
-        console.log(error);
-        return res.status(401).json(new ApiError(401,"Error fetching the user"));
-    }
-})
-
-const logout=asyncHandler(async(req,res)=>{
-    const userid=req.user?._id;
-    const user=await User.findById(userid)
-    if(!user) return res.status(400).json(new ApiError(400,"User Not Found"));
-
-    if(user.googleAccessToken){
-        try {
-            await axios.post(`https://oauth2.googleapis.com/revoke?token=${user.googleAccessToken}`,{},
-                {headers:{"Content-Type":"application/x-www-form-urlencoded"}}
-            );
-        } catch (error) {
-            console.log("Google Token Revoke error",error.response?.data||error.message)
-        }
-    }
-
-    user.googleAccessToken=undefined;
-    user.googleRefreshToken=undefined;
-    user.refreshToken=undefined;
-    await user.save({validateBeforeSave: false})
-
-    return res.status(200)
-    .clearCookie("accessToken",options)
-    .clearCookie("refreshToken",options)
-    .json(new ApiResponse(200,"User logged out successfully"));
-})
-
-export {signup_login,refresh_access_token,getuserInfo,logout};
+export {registerUser,login,logout,getcurruser,changepass,changedetails,refresh_access_token};
+// export {signup_login,refresh_access_token,getuserInfo,logout};
