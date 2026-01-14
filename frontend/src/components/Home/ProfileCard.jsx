@@ -13,14 +13,14 @@ export default function ProfileCard() {
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const displayName = user?.names?.[0]?.displayName || "User";
-  const email = user?.emailAddresses?.[0]?.value || "No email";
+  const displayName = user?.username|| "User";
+  const email = user?.email || "No email";
   const photoUrl = user?.photos?.[0]?.url || null;
 
   const handleLogout = async () => {
     const success = await logout();
     if (success) {
-      navigate("/sign-up");
+      navigate("/login");
     }
   };
 

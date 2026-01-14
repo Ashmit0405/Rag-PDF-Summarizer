@@ -4,14 +4,23 @@ import './App.css'
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { AuthContext } from './context/authContext.jsx'
 import Home from './pages/Home.jsx'
-import AuthSuccess from './pages/AuthSuccess.jsx'
+import Login from './pages/Login.jsx'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
-  if (!user) return <Navigate to="/signup" replace />;
   if (loading) return <p>Loading...</p>;
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
+
+function PublicRoute({ children }) {
+  const { user, loading } = useContext(AuthContext);
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
 
 function App() {
   return (
@@ -21,13 +30,29 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Home/>
+              <Home />
             </ProtectedRoute>
           }
         />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/auth/success" element={<AuthSuccess />} />
-        <Route path="/index.html" element={<AuthSuccess/>} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
+        {/* <Route path="/auth/success" element={<AuthSuccess />} />
+          <Route path="/index.html" element={<AuthSuccess/>} /> */}
       </Routes>
     </BrowserRouter>
   )
