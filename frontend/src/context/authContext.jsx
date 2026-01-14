@@ -42,6 +42,9 @@ const login = async (credentials) => {
         message: error.response?.data?.message || "Login failed",
       };
     }
+    finally{
+      setLoading(false);
+    }
   };
   const logout = async () => {
     try {
@@ -54,6 +57,7 @@ const login = async (credentials) => {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
+      setLoading(false);
     }
   };
   return (
