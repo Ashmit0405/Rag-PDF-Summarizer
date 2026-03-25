@@ -24,7 +24,7 @@ function Signup() {
 
     try {
       await axios.post(
-        "http://localhost:8000/register",
+        "https://rag-pdf-summarizer-5e3a.onrender.com/register",
         form,
         { withCredentials: true }
       );
